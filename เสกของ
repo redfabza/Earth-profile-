@@ -1,0 +1,263 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- =========================
+-- GUI
+-- =========================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "WackShop_ToolGiver"
+screenGui.IgnoreGuiInset = true
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui
+
+-- Main Panel
+local Main = Instance.new("Frame", screenGui)
+Main.Size = UDim2.fromOffset(220, 280)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+Main.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+Main.BorderSizePixel = 0
+Main.ZIndex = 10
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14)
+local mainStroke = Instance.new("UIStroke", Main)
+mainStroke.Thickness = 1.5
+mainStroke.Color = Color3.fromRGB(0, 200, 255)
+
+-- Title Bar
+local TitleBar = Instance.new("Frame", Main)
+TitleBar.Size = UDim2.new(1, 0, 0, 42)
+TitleBar.BackgroundColor3 = Color3.fromRGB(18, 18, 30)
+TitleBar.BorderSizePixel = 0
+TitleBar.ZIndex = 10
+Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 14)
+
+local TitleLabel = Instance.new("TextLabel", TitleBar)
+TitleLabel.Size = UDim2.new(1, -45, 1, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "🎒 WackShop Tool Giver"
+TitleLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 13
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.ZIndex = 10
+
+-- ปุ่มปิดถาวร
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.fromOffset(32, 32)
+CloseBtn.AnchorPoint = Vector2.new(1, 0)
+CloseBtn.Position = UDim2.new(1, 0, 0, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 16
+CloseBtn.AutoButtonColor = false
+CloseBtn.BorderSizePixel = 0
+CloseBtn.ZIndex = 20
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 8)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Draggable
+local dragging, dragStart, startPos
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if dragging and (
+        input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch
+    ) then
+        local d = input.Position - dragStart
+        Main.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + d.X,
+            startPos.Y.Scale, startPos.Y.Offset + d.Y
+        )
+        -- FloatBtn ตามหน้าต่างหลัก
+        FloatBtn.Position = UDim2.new(
+            Main.Position.X.Scale,
+            Main.Position.X.Offset - 54,
+            Main.Position.Y.Scale,
+            Main.Position.Y.Offset - 22
+        )
+    end
+end)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+-- ปุ่ม W ลอย (ซ้ายของ Main)
+local FloatBtn = Instance.new("TextButton", screenGui)
+FloatBtn.Size = UDim2.fromOffset(44, 44)
+FloatBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+FloatBtn.Position = UDim2.new(0.5, -134, 0.5, 0)
+FloatBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 30)
+FloatBtn.Text = "W"
+FloatBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+FloatBtn.TextSize = 18
+FloatBtn.Font = Enum.Font.GothamBold
+FloatBtn.AutoButtonColor = false
+FloatBtn.BorderSizePixel = 0
+FloatBtn.ZIndex = 20
+Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(1, 0)
+local floatStroke = Instance.new("UIStroke", FloatBtn)
+floatStroke.Color = Color3.fromRGB(0, 200, 255)
+floatStroke.Thickness = 1.5
+
+local mainVisible = true
+FloatBtn.MouseButton1Click:Connect(function()
+    mainVisible = not mainVisible
+    Main.Visible = mainVisible
+end)
+
+-- =========================
+-- ScrollingFrame รายการ Tool
+-- =========================
+local ScrollFrame = Instance.new("ScrollingFrame", Main)
+ScrollFrame.Size = UDim2.new(1, -16, 1, -100)
+ScrollFrame.Position = UDim2.new(0, 8, 0, 50)
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 3
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 255)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ScrollFrame.ZIndex = 10
+Instance.new("UICorner", ScrollFrame).CornerRadius = UDim.new(0, 8)
+
+local listLayout = Instance.new("UIListLayout", ScrollFrame)
+listLayout.Padding = UDim.new(0, 4)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local padding = Instance.new("UIPadding", ScrollFrame)
+padding.PaddingTop = UDim.new(0, 4)
+padding.PaddingLeft = UDim.new(0, 4)
+padding.PaddingRight = UDim.new(0, 4)
+
+-- ปุ่ม Update
+local UpdateBtn = Instance.new("TextButton", Main)
+UpdateBtn.Size = UDim2.new(1, -16, 0, 34)
+UpdateBtn.Position = UDim2.new(0, 8, 1, -42)
+UpdateBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 220)
+UpdateBtn.Text = "🔄 อัปเดตรายการ"
+UpdateBtn.TextColor3 = Color3.new(1, 1, 1)
+UpdateBtn.Font = Enum.Font.GothamBold
+UpdateBtn.TextSize = 13
+UpdateBtn.AutoButtonColor = false
+UpdateBtn.BorderSizePixel = 0
+UpdateBtn.ZIndex = 10
+Instance.new("UICorner", UpdateBtn).CornerRadius = UDim.new(0, 8)
+
+UpdateBtn.MouseEnter:Connect(function()
+    TweenService:Create(UpdateBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(0, 190, 255)
+    }):Play()
+end)
+UpdateBtn.MouseLeave:Connect(function()
+    TweenService:Create(UpdateBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(0, 160, 220)
+    }):Play()
+end)
+
+-- =========================
+-- ฟังก์ชัน Tool Giver
+-- =========================
+local function cloneToBackpack(tool)
+    local ok, err = pcall(function()
+        local clone = tool:Clone()
+        clone.Parent = LocalPlayer:WaitForChild("Backpack")
+    end)
+    if not ok then
+        warn("[ToolGiver] ไม่สามารถ clone ได้:", err)
+    end
+end
+
+local function createToolBtn(tool)
+    local btn = Instance.new("TextButton", ScrollFrame)
+    btn.Size = UDim2.new(1, 0, 0, 34)
+    btn.BackgroundColor3 = Color3.fromRGB(22, 22, 34)
+    btn.Text = "🔧 " .. tool.Name
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 12
+    btn.AutoButtonColor = false
+    btn.BorderSizePixel = 0
+    btn.ZIndex = 11
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.TextTruncate = Enum.TextTruncate.AtEnd
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+    local pad = Instance.new("UIPadding", btn)
+    pad.PaddingLeft = UDim.new(0, 8)
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+        }):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(22, 22, 34)
+        }):Play()
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        cloneToBackpack(tool)
+        TweenService:Create(btn, TweenInfo.new(0.1), {
+            BackgroundColor3 = Color3.fromRGB(0, 160, 80)
+        }):Play()
+        task.delay(0.3, function()
+            if btn and btn.Parent then
+                TweenService:Create(btn, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(22, 22, 34)
+                }):Play()
+            end
+        end)
+    end)
+end
+
+local function updateList()
+    for _, v in ipairs(ScrollFrame:GetChildren()) do
+        if v:IsA("TextButton") then v:Destroy() end
+    end
+
+    local seen = {}
+    for _, v in ipairs(game:GetDescendants()) do
+        if v:IsA("Tool")
+        and v.Parent
+        and v.Parent.Parent ~= LocalPlayer then
+            if not seen[v.Name] then
+                seen[v.Name] = true
+                createToolBtn(v)
+            end
+        end
+    end
+
+    local count = 0
+    for _ in pairs(seen) do count = count + 1 end
+    UpdateBtn.Text = string.format("🔄 อัปเดต (%d tool)", count)
+    task.delay(1.5, function()
+        if UpdateBtn and UpdateBtn.Parent then
+            UpdateBtn.Text = "🔄 อัปเดตรายการ"
+        end
+    end)
+end
+
+UpdateBtn.MouseButton1Click:Connect(updateList)
+task.defer(updateList)
+
+print("✅ WackShop Tool Giver Loaded!")
